@@ -44,7 +44,7 @@ jobs:
           context: .
           push: true
           tags: |
-            ${{ env.DOCKER_REGISTRY }}/${{ env.DOCKER_IMAGE_NAME }}:Qwen3.6
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:Qwen3.6
           labels: ${{ steps.meta.outputs.labels }}
 
       - name: Generate artifact attestation
