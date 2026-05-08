@@ -43,7 +43,7 @@ cd /models
 mkdir -p mradermacher/Qwen3.6-27B-i1-GGUF
 cd mradermacher/Qwen3.6-27B-i1-GGUF
 aria2c -x8 -s8 -o Qwen3.6-27B.i1-Q4_K_M.gguf https://huggingface.co/mradermacher/Qwen3.6-27B-i1-GGUF/resolve/main/Qwen3.6-27B.i1-Q4_K_M.gguf
-aria2c -x8 -s8 -o mmproj-BF16.gguf https://huggingface.co/unsloth/Qwen3.6-27B-GGUF/blob/main/mmproj-BF16.gguf
+aria2c -x8 -s8 -o mmproj-BF16.gguf https://huggingface.co/unsloth/Qwen3.6-27B-GGUF/resolve/main/mmproj-BF16.gguf
 
 cd /app
 ./llama-server -m /models/mradermacher/Qwen3.6-27B-i1-GGUF/Qwen3.6-27B.i1-Q4_K_M.gguf --mmproj /models/mradermacher/Qwen3.6-27B-i1-GGUF/mmproj-BF16.gguf --reasoning-format deepseek --ctx-size 262144 --jinja --verbosity 3 --port 8080 --host 0.0.0.0 -n 512
