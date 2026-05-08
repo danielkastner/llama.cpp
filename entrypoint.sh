@@ -46,7 +46,7 @@ aria2c -x8 -s8 -o Qwen3.6-27B.i1-Q4_K_M.gguf https://huggingface.co/mradermacher
 aria2c -x8 -s8 -o mmproj-BF16.gguf https://huggingface.co/unsloth/Qwen3.6-27B-GGUF/resolve/main/mmproj-BF16.gguf
 
 echo "[entrypoint] sshpass -p ${SSH_PASSWORD} ssh -L 21434:localhost:11434 -p ${VAST_TCP_PORT_22} -o StrictHostKeyChecking=no ${SSH_USER}@${PUBLIC_IPADDR}"
-echo "[entrypoint] ANTHROPIC_BASE_URL=\"http://${PUBLIC_IPADDR}:${VAST_TCP_PORT_8080}\" ANTHROPIC_API_KEY=sk-not-required ANTHROPIC_CUSTOM_MODEL_OPTION=\"Qwen3.6-27B.i1-Q4_K_M\" claude --model \"Qwen3.6-27B.i1-Q4_K_M\""
+echo "[entrypoint] ANTHROPIC_BASE_URL=\"http://${PUBLIC_IPADDR}:${VAST_TCP_PORT_8080}\" ANTHROPIC_API_KEY=${LLAMA_API_KEY} ANTHROPIC_CUSTOM_MODEL_OPTION=\"Qwen3.6-27B.i1-Q4_K_M\" claude --model \"Qwen3.6-27B.i1-Q4_K_M\""
 
 # Send to a ntfy-server
 curl \
@@ -59,7 +59,7 @@ curl \
   -H "Authorization: Bearer ${NTFY_TOKEN}" \
   -H "X-Title: Claude Details for ${CONTAINER_ID}" \
   -H "Markdown: yes" \
-  -d "\`ANTHROPIC_BASE_URL=\"http://${PUBLIC_IPADDR}:${VAST_TCP_PORT_8080}\" ANTHROPIC_API_KEY=sk-not-required ANTHROPIC_CUSTOM_MODEL_OPTION=\"Qwen3.6-27B.i1-Q4_K_M\" claude --model \"Qwen3.6-27B.i1-Q4_K_M\"\`" \
+  -d "\`ANTHROPIC_BASE_URL=\"http://${PUBLIC_IPADDR}:${VAST_TCP_PORT_8080}\" ANTHROPIC_API_KEY=${LLAMA_API_KEY} ANTHROPIC_CUSTOM_MODEL_OPTION=\"Qwen3.6-27B.i1-Q4_K_M\" claude --model \"Qwen3.6-27B.i1-Q4_K_M\"\`" \
   "${NTFY_URL}"
 
 cd /app
