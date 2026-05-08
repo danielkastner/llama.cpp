@@ -63,4 +63,4 @@ curl \
   "${NTFY_URL}"
 
 cd /app
-./llama-server -m /models/mradermacher/Qwen3.6-27B-i1-GGUF/Qwen3.6-27B.i1-Q4_K_M.gguf --mmproj /models/mradermacher/Qwen3.6-27B-i1-GGUF/mmproj-BF16.gguf --reasoning-format deepseek --ctx-size 262144 --jinja --verbosity 3 --port 8080 --host 0.0.0.0 -n 512
+./llama-server -m /models/mradermacher/Qwen3.6-27B-i1-GGUF/Qwen3.6-27B.i1-Q4_K_M.gguf --mmproj /models/mradermacher/Qwen3.6-27B-i1-GGUF/mmproj-BF16.gguf --reasoning-format deepseek --api-key "${LLAMA_API_KEY}" --ctx-size 262144 --jinja --verbosity 3 --port 8080 --host 0.0.0.0 -n 512

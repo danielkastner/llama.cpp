@@ -42,6 +42,7 @@ ENV WEBUI_HOST="0.0.0.0" \
     SSH_ENABLE_PASSWORD="0" \
     LLAMA_MODELS="/models" \
     LLAMA_CACHE="/cache" \
+    LLAMA_API_KEY="not-set-or-not-required" \
     HF_MODEL_FILE="https://huggingface.co/mradermacher/Qwen3.6-27B-i1-GGUF/resolve/main/Qwen3.6-27B.i1-Q4_K_M.gguf" \
     HF_MEM_FILE="" \
     HF_MODEL="mradermacher/Qwen3.6-27B-i1-GGUF:Q4_K_M"
