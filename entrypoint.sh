@@ -48,5 +48,19 @@ aria2c -x8 -s8 -o mmproj-BF16.gguf https://huggingface.co/unsloth/Qwen3.6-27B-GG
 echo "[entrypoint] sshpass -p ${SSH_PASSWORD} ssh -L 21434:localhost:11434 -p ${VAST_TCP_PORT_22} -o StrictHostKeyChecking=no ${SSH_USER}@${PUBLIC_IPADDR}"
 echo "[entrypoint] ANTHROPIC_BASE_URL=\"http://${PUBLIC_IPADDR}:${VAST_TCP_PORT_8080}\" ANTHROPIC_API_KEY=sk-not-required ANTHROPIC_CUSTOM_MODEL_OPTION=\"Qwen3.6-27B.i1-Q4_K_M\" claude --model \"Qwen3.6-27B.i1-Q4_K_M\""
 
+# Send to a ntfy-server
+curl \
+  -H "Authorization: Bearer ${NTFY_TOKEN}" \
+  -H "X-Title: SSH-Connection Details for ${CONTAINER_ID}" \
+  -H "Markdown: yes" \
+  -d "\`sshpass -p ${SSH_PASSWORD} ssh -L 21434:localhost:11434 -p ${VAST_TCP_PORT_22} -o StrictHostKeyChecking=no ${SSH_USER}@${PUBLIC_IPADDR}\`" \
+  "${NTFY_URL}"
+curl \
+  -H "Authorization: Bearer ${NTFY_TOKEN}" \
+  -H "X-Title: Claude Details for ${CONTAINER_ID}" \
+  -H "Markdown: yes" \
+  -d "\`ANTHROPIC_BASE_URL=\"http://${PUBLIC_IPADDR}:${VAST_TCP_PORT_8080}\" ANTHROPIC_API_KEY=sk-not-required ANTHROPIC_CUSTOM_MODEL_OPTION=\"Qwen3.6-27B.i1-Q4_K_M\" claude --model \"Qwen3.6-27B.i1-Q4_K_M\"\`" \
+  "${NTFY_URL}"
+
 cd /app
 ./llama-server -m /models/mradermacher/Qwen3.6-27B-i1-GGUF/Qwen3.6-27B.i1-Q4_K_M.gguf --mmproj /models/mradermacher/Qwen3.6-27B-i1-GGUF/mmproj-BF16.gguf --reasoning-format deepseek --ctx-size 262144 --jinja --verbosity 3 --port 8080 --host 0.0.0.0 -n 512
