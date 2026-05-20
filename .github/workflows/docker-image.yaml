@@ -2,9 +2,9 @@ name: Docker Image CI
 
 on:
   push:
-    branches: [ "Qwen3.6" ]
+    branches: [ "Qwen3-Coder-Next" ]
   pull_request:
-    branches: [ "Qwen3.6" ]
+    branches: [ "Qwen3-Coder-Next" ]
 
 env:
   REGISTRY: ghcr.io
@@ -44,7 +44,7 @@ jobs:
           context: .
           push: true
           tags: |
-            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:Qwen3.6
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:Qwen3-Coder-Next
           labels: ${{ steps.meta.outputs.labels }}
 
       - name: Generate artifact attestation
