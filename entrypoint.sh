@@ -44,22 +44,52 @@ mkdir -p unsloth/Qwen3-Coder-Next-UD-Q2_K_XL
 cd unsloth/Qwen3-Coder-Next-UD-Q2_K_XL
 aria2c -x8 -s8 -o Qwen3-Coder-Next-UD-Q2_K_XL.gguf https://huggingface.co/unsloth/Qwen3-Coder-Next-GGUF/resolve/main/Qwen3-Coder-Next-UD-Q2_K_XL.gguf
 
-echo "[entrypoint] sshpass -p ${SSH_PASSWORD} ssh -L 21434:localhost:11434 -p ${VAST_TCP_PORT_22} -o StrictHostKeyChecking=no ${SSH_USER}@${PUBLIC_IPADDR}"
-echo "[entrypoint] ANTHROPIC_BASE_URL=\"http://${PUBLIC_IPADDR}:${VAST_TCP_PORT_8080}\" ANTHROPIC_API_KEY=${LLAMA_API_KEY} ANTHROPIC_CUSTOM_MODEL_OPTION=\"Qwen3-Coder-Next-UD-Q2_K_XL\" claude --model \"Qwen3-Coder-Next-UD-Q2_K_XL\""
+# Get public IP Address, Port and so on
+# First check for public IP on Vast.ai
+if [ -n "${PUBLIC_IPADDR:-}" ]; then
+    PUBLIC_IP="${PUBLIC_IPADDR:-UNDEFINED}"
+fi
+# Then for public IP on Runpod.io
+if [ -n "${RUNPOD_PUBLIC_IP:-}" ]; then
+    PUBLIC_IP="${RUNPOD_PUBLIC_IP:-UNDEFINED}"
+fi
+# First check for public TCP Port 22 on Vast.ai
+if [ -n "${VAST_TCP_PORT_22:-}" ]; then
+    PUBLIC_PORT_22="${VAST_TCP_PORT_22:-UNDEFINED}"
+fi
+# Then for public TCP Port 22 on Runpod.io
+if [ -n "${RUNPOD_TCP_PORT_22:-}" ]; then
+    PUBLIC_PORT_22="${RUNPOD_TCP_PORT_22:-UNDEFINED}"
+fi
+# First check for public TCP Port 8080 on Vast.ai
+if [ -n "${VAST_TCP_PORT_8080:-}" ]; then
+    PUBLIC_PORT_8080="${VAST_TCP_PORT_8080:-UNDEFINED}"
+fi
+# Then for public TCP Port 8080 on Runpod.io
+if [ -n "${RUNPOD_TCP_PORT_8080:-}" ]; then
+    PUBLIC_PORT_8080="${RUNPOD_TCP_PORT_8080:-UNDEFINED}"
+fi
+# Check if we're on Runpod.io and store Pod ID into CONTAINER_ID
+if [ -n "${RUNPOD_POD_ID:-}" ]; then
+    CONTAINER_ID="${RUNPOD_POD_ID:-UNDEFINED}"
+fi
+
+echo "[entrypoint] sshpass -p ${SSH_PASSWORD} ssh -L 21434:localhost:11434 -p ${PUBLIC_PORT_22} -o StrictHostKeyChecking=no ${SSH_USER}@${PUBLIC_IP}"
+echo "[entrypoint] ANTHROPIC_BASE_URL=\"http://${PUBLIC_IP}:${PUBLIC_PORT_8080}\" ANTHROPIC_API_KEY=${LLAMA_API_KEY} ANTHROPIC_CUSTOM_MODEL_OPTION=\"Qwen3-Coder-Next-UD-Q2_K_XL\" claude --model \"Qwen3-Coder-Next-UD-Q2_K_XL\""
 
 # Send to a ntfy-server
 curl \
   -H "Authorization: Bearer ${NTFY_TOKEN}" \
   -H "X-Title: SSH-Connection Details for ${CONTAINER_ID}" \
   -H "Markdown: yes" \
-  -d "\`sshpass -p ${SSH_PASSWORD} ssh -L 21434:localhost:11434 -p ${VAST_TCP_PORT_22} -o StrictHostKeyChecking=no ${SSH_USER}@${PUBLIC_IPADDR}\`" \
+  -d "\`sshpass -p ${SSH_PASSWORD} ssh -L 21434:localhost:11434 -p ${PUBLIC_PORT_22} -o StrictHostKeyChecking=no ${SSH_USER}@${PUBLIC_IP}\`" \
   "${NTFY_URL}"
 curl \
   -H "Authorization: Bearer ${NTFY_TOKEN}" \
   -H "X-Title: Claude Details for ${CONTAINER_ID}" \
   -H "Markdown: yes" \
-  -d "\`ANTHROPIC_BASE_URL=\"http://${PUBLIC_IPADDR}:${VAST_TCP_PORT_8080}\" ANTHROPIC_API_KEY=${LLAMA_API_KEY} ANTHROPIC_CUSTOM_MODEL_OPTION=\"Qwen3-Coder-Next-UD-Q2_K_XL\" claude --model \"Qwen3-Coder-Next-UD-Q2_K_XL\"\`" \
+  -d "\`ANTHROPIC_BASE_URL=\"http://${PUBLIC_IP}:${PUBLIC_PORT_8080}\" ANTHROPIC_API_KEY=${LLAMA_API_KEY} ANTHROPIC_CUSTOM_MODEL_OPTION=\"Qwen3-Coder-Next-UD-Q2_K_XL\" claude --model \"Qwen3-Coder-Next-UD-Q2_K_XL\"\`" \
   "${NTFY_URL}"
 
 cd /app
-./llama-server -m /models/unsloth/Qwen3-Coder-Next-UD-Q2_K_XL/Qwen3-Coder-Next-UD-Q2_K_XL.gguf --reasoning-format deepseek --api-key "${LLAMA_API_KEY}" --ctx-size 262144 --jinja --verbosity 3 --port 8080 --host 0.0.0.0 -n 512
+./llama-server -m /models/unsloth/Qwen3-Coder-Next-UD-Q2_K_XL/Qwen3-Coder-Next-UD-Q2_K_XL.gguf --reasoning-format deepseek --api-key "${LLAMA_API_KEY}" --ctx-size 262144 --jinja --verbosity 3 --port 8080 --host 0.0.0.0 -n 512 2>&1 | tee llama-server.log
