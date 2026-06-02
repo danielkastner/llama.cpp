@@ -46,6 +46,7 @@ aria2c -x8 -s8 -o Qwen3-Coder-Next-UD-Q2_K_XL.gguf https://huggingface.co/unslot
 
 # Get public IP Address, Port and so on
 # First check for public IP on Vast.ai
+PUBLIC_IPADDR="UNDEFINED"
 if [ -n "${PUBLIC_IPADDR:-}" ]; then
     PUBLIC_IP="${PUBLIC_IPADDR:-UNDEFINED}"
 fi
@@ -54,6 +55,7 @@ if [ -n "${RUNPOD_PUBLIC_IP:-}" ]; then
     PUBLIC_IP="${RUNPOD_PUBLIC_IP:-UNDEFINED}"
 fi
 # First check for public TCP Port 22 on Vast.ai
+PUBLIC_PORT_22="UNDEFINED"
 if [ -n "${VAST_TCP_PORT_22:-}" ]; then
     PUBLIC_PORT_22="${VAST_TCP_PORT_22:-UNDEFINED}"
 fi
@@ -62,6 +64,7 @@ if [ -n "${RUNPOD_TCP_PORT_22:-}" ]; then
     PUBLIC_PORT_22="${RUNPOD_TCP_PORT_22:-UNDEFINED}"
 fi
 # First check for public TCP Port 8080 on Vast.ai
+PUBLIC_PORT_8080="UNDEFINED"
 if [ -n "${VAST_TCP_PORT_8080:-}" ]; then
     PUBLIC_PORT_8080="${VAST_TCP_PORT_8080:-UNDEFINED}"
 fi
