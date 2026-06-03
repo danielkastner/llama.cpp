@@ -83,11 +83,11 @@ if [ -n "${PUBLIC_IPADDR:-}" ]; then
 fi
 # Then for public IP on Runpod.io
 if [ -n "${RUNPOD_PUBLIC_IP:-}" ]; then
-    ANTHROPIC_BASE_URL="https://${RUNPOD_POD_ID}-8080.proxy.runpod.net/"
+    ANTHROPIC_BASE_URL="https://${RUNPOD_POD_ID}-8080.proxy.runpod.net"
 fi
 
 echo "[entrypoint] sshpass -p ${SSH_PASSWORD} ssh -p ${PUBLIC_PORT_22} -o StrictHostKeyChecking=no ${SSH_USER}@${PUBLIC_IP}"
-echo "[entrypoint] ANTHROPIC_BASE_URL=\"${ANTHROPIC_BASE_URL}" ANTHROPIC_API_KEY=${LLAMA_API_KEY} ANTHROPIC_CUSTOM_MODEL_OPTION=\"Qwen3-Coder-Next-UD-Q2_K_XL\" claude --model \"Qwen3-Coder-Next-UD-Q2_K_XL\""
+echo "[entrypoint] ANTHROPIC_BASE_URL=\"${ANTHROPIC_BASE_URL}\" ANTHROPIC_API_KEY=${LLAMA_API_KEY} ANTHROPIC_CUSTOM_MODEL_OPTION=\"Qwen3-Coder-Next-UD-Q2_K_XL\" claude --model \"Qwen3-Coder-Next-UD-Q2_K_XL\""
 
 # Send to a ntfy-server
 curl \
@@ -100,7 +100,7 @@ curl \
   -H "Authorization: Bearer ${NTFY_TOKEN}" \
   -H "X-Title: Claude Details for ${CONTAINER_ID}" \
   -H "Markdown: yes" \
-  -d "\`ANTHROPIC_BASE_URL=\"${ANTHROPIC_BASE_URL}" ANTHROPIC_API_KEY=${LLAMA_API_KEY} ANTHROPIC_CUSTOM_MODEL_OPTION=\"Qwen3-Coder-Next-UD-Q2_K_XL\" claude --model \"Qwen3-Coder-Next-UD-Q2_K_XL\"\`" \
+  -d "\`ANTHROPIC_BASE_URL=\"${ANTHROPIC_BASE_URL}\" ANTHROPIC_API_KEY=${LLAMA_API_KEY} ANTHROPIC_CUSTOM_MODEL_OPTION=\"Qwen3-Coder-Next-UD-Q2_K_XL\" claude --model \"Qwen3-Coder-Next-UD-Q2_K_XL\"\`" \
   "${NTFY_URL}"
 
 cd /app
