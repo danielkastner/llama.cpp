@@ -46,7 +46,7 @@ aria2c -x8 -s8 -o Qwen3-Coder-Next-UD-Q2_K_XL.gguf https://huggingface.co/unslot
 
 # Get public IP Address, Port and so on
 # First check for public IP on Vast.ai
-PUBLIC_IPADDR="UNDEFINED"
+PUBLIC_IP="UNDEFINED"
 if [ -n "${PUBLIC_IPADDR:-}" ]; then
     PUBLIC_IP="${PUBLIC_IPADDR:-UNDEFINED}"
 fi
@@ -79,7 +79,7 @@ fi
 # First check if on Vast.AI for creating ANTHROPIC_BASE_URL
 ANTHROPIC_BASE_URL="UNDEFINED"
 if [ -n "${PUBLIC_IPADDR:-}" ]; then
-    ANTHROPIC_BASE_URL="http://${PUBLIC_IP}:${PUBLIC_PORT_8080}\""
+    ANTHROPIC_BASE_URL="http://${PUBLIC_IPADDR}:${PUBLIC_PORT_8080}"
 fi
 # Then for public IP on Runpod.io
 if [ -n "${RUNPOD_PUBLIC_IP:-}" ]; then
