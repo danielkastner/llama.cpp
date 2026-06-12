@@ -87,6 +87,7 @@ if [ -n "${RUNPOD_PUBLIC_IP:-}" ]; then
 fi
 
 echo "[entrypoint] sshpass -p ${SSH_PASSWORD} ssh -p ${PUBLIC_PORT_22} -o StrictHostKeyChecking=no ${SSH_USER}@${PUBLIC_IP}"
+echo "[entrypoint] sshpass -p ${SSH_PASSWORD} scp -P ${PUBLIC_PORT_22} -o StrictHostKeyChecking=no ${SSH_USER}@${PUBLIC_IP}:/app/llama-server.log ./llama-server-on-${CONTAINER_ID}.log"
 echo "[entrypoint] ANTHROPIC_BASE_URL=\"${ANTHROPIC_BASE_URL}\" ANTHROPIC_API_KEY=${LLAMA_API_KEY} ANTHROPIC_CUSTOM_MODEL_OPTION=\"Qwen3-Coder-Next-UD-Q2_K_XL\" claude --model \"Qwen3-Coder-Next-UD-Q2_K_XL\""
 
 # Send to a ntfy-server
@@ -95,6 +96,12 @@ curl \
   -H "X-Title: SSH-Connection Details for ${CONTAINER_ID}" \
   -H "Markdown: yes" \
   -d "\`sshpass -p ${SSH_PASSWORD} ssh -p ${PUBLIC_PORT_22} -o StrictHostKeyChecking=no ${SSH_USER}@${PUBLIC_IP}\`" \
+  "${NTFY_URL}"
+curl \
+  -H "Authorization: Bearer ${NTFY_TOKEN}" \
+  -H "X-Title: SSH-Connection Details for ${CONTAINER_ID}" \
+  -H "Markdown: yes" \
+  -d "\`sshpass -p ${SSH_PASSWORD} scp -P ${PUBLIC_PORT_22} -o StrictHostKeyChecking=no ${SSH_USER}@${PUBLIC_IP}:/app/llama-server.log ./llama-server-on-${CONTAINER_ID}.log\`" \
   "${NTFY_URL}"
 curl \
   -H "Authorization: Bearer ${NTFY_TOKEN}" \

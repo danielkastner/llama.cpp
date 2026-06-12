@@ -4,7 +4,7 @@ LABEL authors="daniel@daniel-kastner.ch"
 RUN apt-get update && apt-get install -y --no-install-recommends \
       ca-certificates curl tini \
       openssh-server sudo zstd \
-      lshw aria2 \
+      lshw aria2 jq \
     && rm -rf /var/lib/apt/lists/*
 
 # OpenSSH runtime dirs + host keys
@@ -49,6 +49,8 @@ ENV WEBUI_HOST="0.0.0.0" \
 
 COPY entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
+COPY unload-model.sh /app/unload-model.sh
+RUN chmod +x /app/unload-model.sh
 
 #COPY aitools /aitools
 #RUN chmod +x aitools/*.sh
