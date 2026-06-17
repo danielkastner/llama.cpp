@@ -96,19 +96,49 @@ curl \
   -H "X-Title: SSH-Connection Details for ${CONTAINER_ID}" \
   -H "Markdown: yes" \
   -d "\`sshpass -p ${SSH_PASSWORD} ssh -p ${PUBLIC_PORT_22} -o StrictHostKeyChecking=no ${SSH_USER}@${PUBLIC_IP}\`" \
+  -H "Actions: copy, Copy, sshpass -p ${SSH_PASSWORD} ssh -p ${PUBLIC_PORT_22} -o StrictHostKeyChecking=no ${SSH_USER}@${PUBLIC_IP}" \
   "${NTFY_URL}"
 curl \
   -H "Authorization: Bearer ${NTFY_TOKEN}" \
   -H "X-Title: SSH-Connection Details for ${CONTAINER_ID}" \
   -H "Markdown: yes" \
   -d "\`sshpass -p ${SSH_PASSWORD} scp -P ${PUBLIC_PORT_22} -o StrictHostKeyChecking=no ${SSH_USER}@${PUBLIC_IP}:/app/llama-server.log ./llama-server-on-${CONTAINER_ID}.log\`" \
+  -H "Actions: copy, Copy, sshpass -p ${SSH_PASSWORD} scp -P ${PUBLIC_PORT_22} -o StrictHostKeyChecking=no ${SSH_USER}@${PUBLIC_IP}:/app/llama-server.log ./llama-server-on-${CONTAINER_ID}.log" \
   "${NTFY_URL}"
 curl \
   -H "Authorization: Bearer ${NTFY_TOKEN}" \
   -H "X-Title: Claude Details for ${CONTAINER_ID}" \
   -H "Markdown: yes" \
   -d "\`ANTHROPIC_BASE_URL=\"${ANTHROPIC_BASE_URL}\" ANTHROPIC_API_KEY=${LLAMA_API_KEY} ANTHROPIC_CUSTOM_MODEL_OPTION=\"Qwen3-Coder-Next-UD-Q2_K_XL\" claude --model \"Qwen3-Coder-Next-UD-Q2_K_XL\"\`" \
+  -H "Actions: copy, Copy, ANTHROPIC_BASE_URL=\"${ANTHROPIC_BASE_URL}\" ANTHROPIC_API_KEY=${LLAMA_API_KEY} ANTHROPIC_CUSTOM_MODEL_OPTION=\"Qwen3-Coder-Next-UD-Q2_K_XL\" claude --model \"Qwen3-Coder-Next-UD-Q2_K_XL\"" \
   "${NTFY_URL}"
 
 cd /app
-./llama-server -m /models/unsloth/Qwen3-Coder-Next-UD-Q2_K_XL/Qwen3-Coder-Next-UD-Q2_K_XL.gguf --reasoning-format deepseek --api-key "${LLAMA_API_KEY}" --ctx-size 262144 --jinja --verbosity 3 --port 8080 --host 0.0.0.0 -n 512 2>&1 | tee llama-server.log
+./llama-server \
+  -m /models/unsloth/Qwen3-Coder-Next-UD-Q2_K_XL/Qwen3-Coder-Next-UD-Q2_K_XL.gguf \
+  --flash-attn on \
+  --cache-type-k q8_0 \
+  --cache-type-v q8_0 \
+  --reasoning-format none \
+  --api-key "${LLAMA_API_KEY}" \
+  --ctx-size 262144 \
+  --parallel 1 \
+  --mlock \
+  --metrics \
+  --batch-size 4096 \
+  --ubatch-size 1024 \
+  --jinja \
+  --split-mode layer \
+  --tensor-split 1,1 \
+  --verbosity 3 \
+  --port 8080 \
+  --host 0.0.0.0 \
+  --temp 1.0 \
+  --top-p 0.95 \
+  --min-p 0.01 \
+  --top-k 40 \
+  --no-mmap \
+  --chat-template-kwargs '{"enable_thinking": false}' \
+  -n 512 \
+  -ngl 99 \
+  2>&1 | tee llama-server.log
