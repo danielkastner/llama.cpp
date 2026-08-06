@@ -141,4 +141,4 @@ cd /app
   --chat-template-kwargs '{"enable_thinking": false}' \
   -n 512 \
   -ngl 99 \
-  2>&1 | tee llama-server.log
+  2>&1 | tee llama-server.log | python3 /opt/log_forwarder.py

@@ -4,7 +4,7 @@ LABEL authors="daniel@daniel-kastner.ch"
 RUN apt-get update && apt-get install -y --no-install-recommends \
       ca-certificates curl tini \
       openssh-server sudo zstd \
-      lshw aria2 jq \
+      lshw aria2 jq python3 \
     && rm -rf /var/lib/apt/lists/*
 
 # OpenSSH runtime dirs + host keys
@@ -51,6 +51,8 @@ COPY entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
 COPY unload-model.sh /app/unload-model.sh
 RUN chmod +x /app/unload-model.sh
+COPY log_forwarder.py /app/log_forwarder.py
+RUN chmod a+x /app/log_forwarder.py
 
 #COPY aitools /aitools
 #RUN chmod +x aitools/*.sh
