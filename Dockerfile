@@ -5,7 +5,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
       ca-certificates curl tini \
       openssh-server sudo zstd \
       lshw aria2 jq python3 \
-    && rm -rf /var/lib/apt/lists/* \
+    && rm -rf /var/lib/apt/lists/*
 
 # OpenSSH runtime dirs + host keys
 RUN mkdir -p /var/run/sshd \
