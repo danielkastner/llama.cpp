@@ -42,7 +42,7 @@ SSHD_PID=$!
 cd /models
 mkdir -p unsloth/Qwen3-Coder-Next-UD-Q2_K_XL
 cd unsloth/Qwen3-Coder-Next-UD-Q2_K_XL
-aria2c -x8 -s8 -o Qwen3-Coder-Next-UD-Q2_K_XL.gguf https://huggingface.co/unsloth/Qwen3-Coder-Next-GGUF/resolve/main/Qwen3-Coder-Next-UD-Q2_K_XL.gguf
+aria2c -x8 -s8 -o Qwen3-Coder-Next-UD-Q2_K_XL.gguf https://huggingface.co/unsloth/Qwen3-Coder-Next-GGUF/resolve/main/Qwen3-Coder-Next-UD-Q2_K_XL.gguf 2>&1 | python3 /app/log_forwarder.py initial
 
 # Get public IP Address, Port and so on
 # First check for public IP on Vast.ai
@@ -141,4 +141,4 @@ cd /app
   --chat-template-kwargs '{"enable_thinking": false}' \
   -n 512 \
   -ngl 99 \
-  2>&1 | tee llama-server.log | python3 /opt/log_forwarder.py
+  2>&1 | python3 ./log_forwarder.py

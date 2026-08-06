@@ -1,12 +1,13 @@
-import json
+#!/usr/bin/env python3
+
 import os
+import signal
 import socket
+import sys
 import threading
 import time
 
 import requests
-
-LOGFILE = os.getenv("LOGFILE", "/app/llama-server.log")
 
 LICENSE_KEY = os.getenv("NEW_RELIC_LICENSE_KEY")
 ENDPOINT = os.getenv(
@@ -22,65 +23,95 @@ SERVICE = os.getenv("NEW_RELIC_SERVICE", "llama-server")
 
 SEND_INTERVAL = int(os.getenv("NEW_RELIC_INTERVAL", "5"))
 
-buffer = [{
-    "message": 'Collecting Logs for {HOSTNAME} just started'.format(HOSTNAME = HOSTNAME),
-    "hostname": HOSTNAME,
-    "service": SERVICE
-}]
+buffer = []
+mode = sys.argv[1] if len(sys.argv) > 1 else "appending"
+if mode == "initial":
+    buffer.append({
+        "message": 'Collecting Logs for {HOSTNAME} just started'.format(HOSTNAME = HOSTNAME),
+        "hostname": HOSTNAME,
+        "service": SERVICE
+    })
 
+lock = threading.Lock()
+shutdown = threading.Event()
 
-def sender():
-    while True:
-        time.sleep(SEND_INTERVAL)
-
+def flush():
+    with lock:
         if not buffer:
-            continue
+            return
 
         payload = buffer.copy()
         buffer.clear()
 
-        try:
-            print("Try sending Logs to New Relic...")
-            requests.post(
-                ENDPOINT,
-                headers={
-                    "Api-Key": LICENSE_KEY,
-                    "Content-Type": "application/json"
-                },
-                json=payload,
-                timeout=10,
+    try:
+        response = requests.post(
+            ENDPOINT,
+            headers={
+                "Api-Key": LICENSE_KEY,
+                "Content-Type": "application/json",
+            },
+            json=payload,
+            timeout=10,
+        )
+
+        if response.status_code >= 300:
+            print(
+                f"New Relic upload failed: {response.status_code} {response.text}",
+                file=sys.stderr,
             )
-        except Exception as e:
-            print(f"New Relic upload failed: {e}")
+
+    except Exception as e:
+        print(f"New Relic upload failed: {e}", file=sys.stderr)
 
 
-def follow(filename):
-    print('Following Logfile at {filename}'.format(filename = filename))
-    with open(filename, "r") as f:
-        f.seek(0, 0)
+def sender():
+    while not shutdown.wait(SEND_INTERVAL):
+        flush()
 
-        while True:
-            line = f.readline()
 
-            if not line:
-                time.sleep(0.2)
-                continue
+def signal_handler(signum, frame):
+    print("Stopping log forwarder...", file=sys.stderr)
 
+    shutdown.set()
+
+    # Letzten Puffer senden
+    flush()
+
+    sys.exit(0)
+
+
+def reader():
+    for line in sys.stdin:
+        line = line.rstrip("\r\n")
+
+        if not line:
+            continue
+
+        with lock:
             buffer.append({
-                "message": line.rstrip(),
+                "message": line,
                 "hostname": HOSTNAME,
-                "service": SERVICE
+                "service": SERVICE,
+                "timestamp": int(time.time() * 1000),
             })
+
+        # Zeile weiterhin ausgeben
+        print(line, flush=True)
+
+    # stdin wurde geschlossen (Anwendung beendet)
+    shutdown.set()
+    flush()
 
 
 if __name__ == "__main__":
 
     if not LICENSE_KEY:
-        print("NEW_RELIC_LICENSE_KEY not set")
-        exit(0)
+        print("NEW_RELIC_LICENSE_KEY not set", file=sys.stderr)
+        sys.exit(0)
 
-    print('Log Collector started on {HOSTNAME}...'.format(HOSTNAME = HOSTNAME))
+    signal.signal(signal.SIGTERM, signal_handler)
+    signal.signal(signal.SIGINT, signal_handler)
 
     threading.Thread(target=sender, daemon=True).start()
 
-    follow(LOGFILE)
+    reader()
