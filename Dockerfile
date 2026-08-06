@@ -5,7 +5,10 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
       ca-certificates curl tini \
       openssh-server sudo zstd \
       lshw aria2 jq python3 \
-    && rm -rf /var/lib/apt/lists/*
+    && rm -rf /var/lib/apt/lists/* \
+
+# Install Requests Module for Python
+RUN pip3 install requests
 
 # OpenSSH runtime dirs + host keys
 RUN mkdir -p /var/run/sshd \
@@ -52,7 +55,9 @@ RUN chmod +x /entrypoint.sh
 COPY unload-model.sh /app/unload-model.sh
 RUN chmod +x /app/unload-model.sh
 COPY log_forwarder.py /app/log_forwarder.py
-RUN chmod a+x /app/log_forwarder.py
+RUN chmod +x /app/log_forwarder.py
+COPY send_log_message.sh /send_log_message.sh
+RUN chmod +x /send_log_message.sh
 
 #COPY aitools /aitools
 #RUN chmod +x aitools/*.sh

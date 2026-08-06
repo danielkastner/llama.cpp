@@ -1,6 +1,50 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+# Get public IP Address, Port and so on
+# First check for public IP on Vast.ai
+PUBLIC_IP="UNDEFINED"
+if [ -n "${PUBLIC_IPADDR:-}" ]; then
+    PUBLIC_IP="${PUBLIC_IPADDR:-UNDEFINED}"
+fi
+# Then for public IP on Runpod.io
+if [ -n "${RUNPOD_PUBLIC_IP:-}" ]; then
+    PUBLIC_IP="${RUNPOD_PUBLIC_IP:-UNDEFINED}"
+fi
+# First check for public TCP Port 22 on Vast.ai
+PUBLIC_PORT_22="UNDEFINED"
+if [ -n "${VAST_TCP_PORT_22:-}" ]; then
+    PUBLIC_PORT_22="${VAST_TCP_PORT_22:-UNDEFINED}"
+fi
+# Then for public TCP Port 22 on Runpod.io
+if [ -n "${RUNPOD_TCP_PORT_22:-}" ]; then
+    PUBLIC_PORT_22="${RUNPOD_TCP_PORT_22:-UNDEFINED}"
+fi
+# First check for public TCP Port 8080 on Vast.ai
+PUBLIC_PORT_8080="UNDEFINED"
+if [ -n "${VAST_TCP_PORT_8080:-}" ]; then
+    PUBLIC_PORT_8080="${VAST_TCP_PORT_8080:-UNDEFINED}"
+fi
+# Then for public TCP Port 8080 on Runpod.io
+if [ -n "${RUNPOD_TCP_PORT_8080:-}" ]; then
+    PUBLIC_PORT_8080="${RUNPOD_TCP_PORT_8080:-UNDEFINED}"
+fi
+# Check if we're on Runpod.io and store Pod ID into CONTAINER_ID
+if [ -n "${RUNPOD_POD_ID:-}" ]; then
+    CONTAINER_ID="${RUNPOD_POD_ID:-UNDEFINED}"
+fi
+# First check if on Vast.AI for creating ANTHROPIC_BASE_URL
+ANTHROPIC_BASE_URL="UNDEFINED"
+if [ -n "${PUBLIC_IPADDR:-}" ]; then
+    ANTHROPIC_BASE_URL="http://${PUBLIC_IPADDR}:${PUBLIC_PORT_8080}"
+fi
+# Then for public IP on Runpod.io
+if [ -n "${RUNPOD_PUBLIC_IP:-}" ]; then
+    ANTHROPIC_BASE_URL="https://${RUNPOD_POD_ID}-8080.proxy.runpod.net"
+fi
+
+/send_log_message.sh "entrypoint on Container ${CONTAINER_ID} just started..."
+
 # ----- SSH user setup -----
 SSH_USER="${SSH_USER:-app}"
 USER_HOME="$(getent passwd "$SSH_USER" | cut -d: -f6 || true)"
@@ -43,48 +87,6 @@ cd /models
 mkdir -p unsloth/Qwen3-Coder-Next-UD-Q2_K_XL
 cd unsloth/Qwen3-Coder-Next-UD-Q2_K_XL
 aria2c -x8 -s8 -o Qwen3-Coder-Next-UD-Q2_K_XL.gguf https://huggingface.co/unsloth/Qwen3-Coder-Next-GGUF/resolve/main/Qwen3-Coder-Next-UD-Q2_K_XL.gguf 2>&1 | python3 /app/log_forwarder.py initial
-
-# Get public IP Address, Port and so on
-# First check for public IP on Vast.ai
-PUBLIC_IP="UNDEFINED"
-if [ -n "${PUBLIC_IPADDR:-}" ]; then
-    PUBLIC_IP="${PUBLIC_IPADDR:-UNDEFINED}"
-fi
-# Then for public IP on Runpod.io
-if [ -n "${RUNPOD_PUBLIC_IP:-}" ]; then
-    PUBLIC_IP="${RUNPOD_PUBLIC_IP:-UNDEFINED}"
-fi
-# First check for public TCP Port 22 on Vast.ai
-PUBLIC_PORT_22="UNDEFINED"
-if [ -n "${VAST_TCP_PORT_22:-}" ]; then
-    PUBLIC_PORT_22="${VAST_TCP_PORT_22:-UNDEFINED}"
-fi
-# Then for public TCP Port 22 on Runpod.io
-if [ -n "${RUNPOD_TCP_PORT_22:-}" ]; then
-    PUBLIC_PORT_22="${RUNPOD_TCP_PORT_22:-UNDEFINED}"
-fi
-# First check for public TCP Port 8080 on Vast.ai
-PUBLIC_PORT_8080="UNDEFINED"
-if [ -n "${VAST_TCP_PORT_8080:-}" ]; then
-    PUBLIC_PORT_8080="${VAST_TCP_PORT_8080:-UNDEFINED}"
-fi
-# Then for public TCP Port 8080 on Runpod.io
-if [ -n "${RUNPOD_TCP_PORT_8080:-}" ]; then
-    PUBLIC_PORT_8080="${RUNPOD_TCP_PORT_8080:-UNDEFINED}"
-fi
-# Check if we're on Runpod.io and store Pod ID into CONTAINER_ID
-if [ -n "${RUNPOD_POD_ID:-}" ]; then
-    CONTAINER_ID="${RUNPOD_POD_ID:-UNDEFINED}"
-fi
-# First check if on Vast.AI for creating ANTHROPIC_BASE_URL
-ANTHROPIC_BASE_URL="UNDEFINED"
-if [ -n "${PUBLIC_IPADDR:-}" ]; then
-    ANTHROPIC_BASE_URL="http://${PUBLIC_IPADDR}:${PUBLIC_PORT_8080}"
-fi
-# Then for public IP on Runpod.io
-if [ -n "${RUNPOD_PUBLIC_IP:-}" ]; then
-    ANTHROPIC_BASE_URL="https://${RUNPOD_POD_ID}-8080.proxy.runpod.net"
-fi
 
 echo "[entrypoint] sshpass -p ${SSH_PASSWORD} ssh -p ${PUBLIC_PORT_22} -o StrictHostKeyChecking=no ${SSH_USER}@${PUBLIC_IP}"
 echo "[entrypoint] sshpass -p ${SSH_PASSWORD} scp -P ${PUBLIC_PORT_22} -o StrictHostKeyChecking=no ${SSH_USER}@${PUBLIC_IP}:/app/llama-server.log ./llama-server-on-${CONTAINER_ID}.log"
