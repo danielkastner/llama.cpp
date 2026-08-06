@@ -7,9 +7,6 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
       lshw aria2 jq python3 \
     && rm -rf /var/lib/apt/lists/* \
 
-# Install Requests Module for Python
-RUN pip3 install requests
-
 # OpenSSH runtime dirs + host keys
 RUN mkdir -p /var/run/sshd \
  && ssh-keygen -A

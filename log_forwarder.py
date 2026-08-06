@@ -6,8 +6,8 @@ import socket
 import sys
 import threading
 import time
-
-import requests
+import urllib.request
+import json
 
 LICENSE_KEY = os.getenv("NEW_RELIC_LICENSE_KEY")
 ENDPOINT = os.getenv(
@@ -40,25 +40,26 @@ def flush():
         if not buffer:
             return
 
-        payload = buffer.copy()
+        payload = json.dumps(buffer.copy()).encode("utf-8")
         buffer.clear()
 
     try:
-        response = requests.post(
+        req = urllib.request.Request(
             ENDPOINT,
+            data=payload,
             headers={
-                "Api-Key": LICENSE_KEY,
                 "Content-Type": "application/json",
+                "Api-Key": LICENSE_KEY
             },
-            json=payload,
-            timeout=10,
+            method="POST"
         )
 
-        if response.status_code >= 300:
-            print(
-                f"New Relic upload failed: {response.status_code} {response.text}",
-                file=sys.stderr,
-            )
+        with urllib.request.urlopen(req, timeout=10) as response:
+            if response.status >= 300:
+                print(
+                    f"New Relic upload failed: {response.status_code} {response.text}",
+                    file=sys.stderr,
+                )
 
     except Exception as e:
         print(f"New Relic upload failed: {e}", file=sys.stderr)
